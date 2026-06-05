@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant N — Vakances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #F5F0E8;
+  --dark: #1A1714;
+  --gold: #B8966A;
+  --gold-light: #D4B48A;
+  --muted: #6B6560;
+  --border: rgba(184,150,106,0.2);
+  --bg-section: #EFEBE1;
+  --error: #C0392B;
+  --success: #2E7D52;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--dark);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(245,240,232,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 500; color: var(--dark);
+  text-decoration: none;
+}
+
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  background: var(--dark);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px; font-weight: 400;
+  color: var(--muted); text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--dark); }
+
+.nav-lang {
+  display: flex; align-items: center; gap: 6px;
+}
+
+.lang-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%; border: none; cursor: pointer;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+  background: transparent; color: var(--muted);
+  transition: all 0.2s;
+}
+.lang-btn.active {
+  background: var(--dark); color: var(--cream);
+}
+.lang-btn:hover:not(.active) { color: var(--dark); }
+
+/* ── HERO ── */
+.hero {
+  padding-top: 64px;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.hero-top {
+  padding: 80px 60px 60px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(184,150,106,0.12);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 11px; font-weight: 500;
+  color: var(--gold); letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--gold); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 300; line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  color: var(--dark);
+}
+
+.hero-title em {
+  font-style: italic; color: var(--gold);
+}
+
+.hero-sub {
+  font-size: 16px; color: var(--muted);
+  max-width: 420px; margin-bottom: 40px;
+  line-height: 1.7;
+}
+
+.hero-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 40px;
+}
+
+.hero-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 20px;
+}
+
+.hero-card-label {
+  font-size: 10px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+
+.hero-card-value {
+  font-size: 15px; font-weight: 400; color: var(--dark);
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--dark); color: var(--cream);
+  border: none; border-radius: 100px;
+  padding: 16px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 400;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.3s;
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover {
+  background: var(--gold); transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(184,150,106,0.3);
+}
+
+.btn-primary svg { transition: transform 0.3s; }
+.btn-primary:hover svg { transform: translateX(4px); }
+
+.hero-image-wrap {
+  position: relative;
+  border-radius: 24px; overflow: hidden;
+  height: 500px;
+}
+
+.hero-image-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.hero-image-placeholder {
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, #2A2420 0%, #3D3028 50%, #1A1714 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 80px; color: rgba(184,150,106,0.3);
+}
+
+/* ── BENEFITS ── */
+.benefits {
+  background: var(--dark);
+  padding: 80px 60px;
+}
+
+.section-tag {
+  font-size: 11px; font-weight: 500;
+  color: var(--gold); letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.section-tag::before {
+  content: '—'; color: var(--gold-light);
+}
+
+.benefits-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 300; color: var(--cream);
+  margin-bottom: 12px; line-height: 1.1;
+}
+
+.benefits-sub {
+  color: rgba(245,240,232,0.5);
+  font-size: 15px; margin-bottom: 60px;
+}
+
+.benefits-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+}
+
+.benefit-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 36px 32px;
+  transition: background 0.3s;
+}
+.benefit-item:hover {
+  background: rgba(184,150,106,0.08);
+}
+
+.benefit-icon {
+  width: 44px; height: 44px;
+  background: rgba(184,150,106,0.12);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.benefit-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 400;
+  color: var(--cream); margin-bottom: 8px;
+}
+
+.benefit-desc {
+  font-size: 13px; color: rgba(245,240,232,0.5);
+  line-height: 1.6;
+}
+
+/* ── PROCESS ── */
+.process {
+  padding: 80px 60px;
+  background: var(--bg-section);
+}
+
+.process-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 300; margin-bottom: 12px;
+  line-height: 1.1;
+}
+
+.process-sub {
+  color: var(--muted); font-size: 15px; margin-bottom: 60px;
+}
+
+.process-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 40px; position: relative;
+}
+
+.process-steps::before {
+  content: '';
+  position: absolute;
+  top: 28px; left: 80px; right: 80px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+
+.process-step { text-align: center; }
+
+.step-num {
+  width: 56px; height: 56px;
+  background: var(--dark);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; color: var(--gold);
+  position: relative; z-index: 1;
+  border: 3px solid var(--bg-section);
+}
+
+.step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.step-desc {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+
+/* ── FORM SECTION ── */
+.form-section {
+  padding: 80px 60px;
+  background: var(--cream);
+}
+
+.form-section-inner {
+  max-width: 720px; margin: 0 auto;
+}
+
+.form-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 300; margin-bottom: 8px;
+  text-align: center;
+}
+
+.form-section-sub {
+  text-align: center; color: var(--muted);
+  font-size: 15px; margin-bottom: 48px;
+}
+
+/* ── FORM WIDGET ── */
+.form-widget {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 40px rgba(26,23,20,0.06);
+}
+
+.form-progress-bar {
+  height: 3px;
+  background: rgba(184,150,106,0.15);
+}
+
+.form-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--gold), var(--gold-light));
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-header {
+  padding: 28px 40px 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.form-step-label {
+  font-size: 11px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.form-step-pct {
+  font-size: 11px; font-weight: 500;
+  color: var(--gold); letter-spacing: 0.05em;
+}
+
+.form-body {
+  padding: 32px 40px 40px;
+}
+
+.form-step-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 400;
+  margin-bottom: 6px;
+}
+
+.form-step-desc {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 32px;
+}
+
+/* Fields */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.field-row.single { grid-template-columns: 1fr; }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+
+label {
+  font-size: 11px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], select, textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid rgba(184,150,106,0.3);
+  border-radius: 10px;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184,150,106,0.12);
+}
+
+input.error, select.error, textarea.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
+}
+
+.error-msg { font-size: 11px; color: var(--error); margin-top: 2px; }
+
+textarea { resize: none; min-height: 90px; }
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* Radio / Checkbox pills */
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px;
+  border: 1px solid rgba(184,150,106,0.3);
+  border-radius: 100px;
+  cursor: pointer; user-select: none;
+  font-size: 13px; color: var(--dark);
+  transition: all 0.2s;
+  background: var(--cream);
+}
+.pill:hover { border-color: var(--gold); color: var(--gold); }
+.pill.selected {
+  background: var(--dark); color: var(--cream);
+  border-color: var(--dark);
+}
+
+.pill input { display: none; }
+
+/* Toggle switch */
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.toggle-row:last-child { border-bottom: none; }
+
+.toggle-label { font-size: 14px; color: var(--dark); }
+
+.toggle {
+  position: relative; width: 44px; height: 24px;
+  cursor: pointer;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: rgba(184,150,106,0.2);
+  border-radius: 100px; transition: 0.3s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: white; left: 3px; top: 3px;
+  transition: 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle input:checked + .toggle-slider { background: var(--dark); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* Language level */
+.lang-item {
+  display: grid; grid-template-columns: 120px 1fr;
+  align-items: center; gap: 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.lang-item:last-child { border-bottom: none; }
+.lang-name { font-size: 14px; font-weight: 400; }
+
+/* AI loading */
+.ai-loading {
+  text-align: center; padding: 48px 20px;
+}
+
+.ai-spinner {
+  width: 48px; height: 48px; margin: 0 auto 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ai-loading-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--dark); margin-bottom: 8px;
+}
+
+.ai-loading-sub { font-size: 13px; color: var(--muted); }
+
+/* AI questions */
+.ai-question {
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.ai-question-label {
+  font-size: 11px; font-weight: 500; color: var(--gold);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.ai-question-text {
+  font-size: 15px; color: var(--dark); line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.ai-question textarea {
+  background: white;
+}
+
+/* Privacy */
+.privacy-box {
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+  margin-top: 24px; margin-bottom: 20px;
+}
+
+.privacy-summary {
+  font-size: 12px; color: var(--muted); line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.privacy-details {
+  display: none; font-size: 11px; color: var(--muted);
+  line-height: 1.7; margin-bottom: 12px;
+  border-top: 1px solid var(--border); padding-top: 12px;
+}
+.privacy-details.open { display: block; }
+
+.privacy-toggle-link {
+  font-size: 11px; color: var(--gold);
+  cursor: pointer; text-decoration: underline;
+  background: none; border: none; font-family: inherit;
+}
+
+.consent-row {
+  display: flex; align-items: flex-start; gap: 12px; margin-top: 16px;
+}
+
+.consent-row input[type="checkbox"] {
+  width: 18px; height: 18px; min-width: 18px;
+  margin-top: 2px; cursor: pointer;
+  accent-color: var(--dark);
+}
+
+.consent-text { font-size: 12px; color: var(--dark); line-height: 1.6; }
+
+/* Nav buttons */
+.form-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; border-top: 1px solid var(--border); margin-top: 32px;
+}
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--muted);
+  transition: color 0.2s;
+  padding: 0;
+}
+.btn-back:hover { color: var(--dark); }
+.btn-back:disabled { opacity: 0; pointer-events: none; }
+
+.btn-next {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--dark); color: var(--cream);
+  border: none; border-radius: 100px;
+  padding: 14px 28px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 400;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-next:hover {
+  background: var(--gold);
+  box-shadow: 0 6px 20px rgba(184,150,106,0.3);
+}
+.btn-next:disabled {
+  opacity: 0.4; cursor: not-allowed;
+  box-shadow: none; background: var(--dark);
+}
+
+.btn-next svg { transition: transform 0.3s; }
+.btn-next:hover:not(:disabled) svg { transform: translateX(3px); }
+
+/* Success */
+.success-screen {
+  text-align: center; padding: 60px 40px;
+}
+
+.success-icon {
+  width: 72px; height: 72px; margin: 0 auto 28px;
+  background: rgba(46,125,82,0.1);
+  border: 2px solid rgba(46,125,82,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+
+.success-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 300; margin-bottom: 12px;
+}
+
+.success-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* Footer */
+footer {
+  background: var(--dark); color: rgba(245,240,232,0.4);
+  text-align: center; padding: 32px;
+  font-size: 12px;
+}
+
+footer span { color: var(--gold-light); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero-top { grid-template-columns: 1fr; padding: 40px 24px; gap: 40px; }
+  .hero-image-wrap { height: 300px; }
+  .benefits { padding: 60px 24px; }
+  .benefits-grid { grid-template-columns: 1fr 1fr; }
+  .process { padding: 60px 24px; }
+  .process-steps { grid-template-columns: 1fr; }
+  .process-steps::before { display: none; }
+  .form-section { padding: 60px 24px; }
+  .form-body { padding: 24px 24px 32px; }
+  .form-header { padding: 20px 24px 0; }
+  .field-row { grid-template-columns: 1fr; }
+  .benefits-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Translations hidden elements ── */
+[data-lang] { display: none; }
+[data-lang].active { display: block; }
+span[data-lang].active { display: inline; }
+
+/* Fade animation */
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">◆</div>
+    Restaurant N
+  </a>
+  <ul class="nav-links">
+    <li><a href="#benefits" data-i18n="nav_benefits">Priekšrocības</a></li>
+    <li><a href="#process" data-i18n="nav_process">Process</a></li>
+    <li><a href="#apply" data-i18n="nav_apply">Pieteikties</a></li>
+  </ul>
+  <div class="nav-lang">
+    <button class="lang-btn active" onclick="setLang('lv')">LV</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ru')">RU</button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n="badge">Atvērta vakance</span>
+      </div>
+      <h1 class="hero-title">
+        <span data-i18n="hero_title_1">Viesmīļa vakance</span><br>
+        <em>Restaurant N</em>
+      </h1>
+      <p class="hero-sub" data-i18n="hero_sub">Aizpildi anketu 3 minūtēs un iziet pirmo atlasi. Mēs novērtēsim tavu pieredzi un sazināsimies personīgi.</p>
+      <div class="hero-cards">
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="salary_label">Alga</div>
+          <div class="hero-card-value">1400–1800 EUR</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="city_label">Pilsēta</div>
+          <div class="hero-card-value">Rīga</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="type_label">Nodarbinātība</div>
+          <div class="hero-card-value" data-i18n="fulltime">Pilna slodze</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="schedule_label">Grafiks</div>
+          <div class="hero-card-value" data-i18n="shifts">Maiņu darbs</div>
+        </div>
+      </div>
+      <a href="#apply" class="btn-primary">
+        <span data-i18n="start_btn">Sākt anketu</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </a>
+    </div>
+    <div class="hero-image-wrap">
+      <div class="hero-image-placeholder"><svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="rgba(184,150,106,0.3)" stroke-width="1.2" stroke-linecap="round"><circle cx="40" cy="40" r="36"/><path d="M20 40h40M40 20v40M28 28l24 24M28 52l24-24"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BENEFITS ── -->
+<section class="benefits" id="benefits">
+  <div class="section-tag" data-i18n="benefits_tag">Restaurant N</div>
+  <h2 class="benefits-title" data-i18n="benefits_title">Kāpēc darbinieki izvēlas mūs</h2>
+  <p class="benefits-sub" data-i18n="benefits_sub">Seši iemesli pievienoties komandai, ar kuru viesi lepojas.</p>
+  <div class="benefits-grid">
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="9"/><path d="M11 7v1.5M11 13.5V15M8.5 9.5a2.5 2 0 0 1 5 0c0 1.5-1 2-2.5 2.5s-2.5 1-2.5 2.5a2.5 2 0 0 0 5 0"/></svg></div>
+      <div class="benefit-title" data-i18n="b1_title">Stabila alga</div>
+      <div class="benefit-desc" data-i18n="b1_desc">Caurspīdīgas likmes, dzeramnauda un bonusi laikā.</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="2"/><path d="M3 9h16M8 2v4M14 2v4M7 13h2M11 13h2M7 16h2"/></svg></div>
+      <div class="benefit-title" data-i18n="b2_title">Elastīgs grafiks</div>
+      <div class="benefit-desc" data-i18n="b2_desc">Cienām tavas studijas, ģimeni un personīgo dzīvi.</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="14" cy="8" r="3"/><path d="M2 19c0-3 2.7-5 6-5M20 19c0-3-2.7-5-6-5"/></svg></div>
+      <div class="benefit-title" data-i18n="b3_title">Draudzīga komanda</div>
+      <div class="benefit-desc" data-i18n="b3_desc">Uzticības un atbalsta atmosfēra katrā maiņā.</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9c0-3.9 3.1-7 7-7s7 3.1 7 7M2 9h18M11 9v10M7 19h8"/></svg></div>
+      <div class="benefit-title" data-i18n="b4_title">Bezmaksas ēdināšana</div>
+      <div class="benefit-desc" data-i18n="b4_desc">Pilnas maltītes maiņas laikā.</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,17 8,11 12,14 19,5"/><polyline points="15,5 19,5 19,9"/></svg></div>
+      <div class="benefit-title" data-i18n="b5_title">Izaugsmes iespējas</div>
+      <div class="benefit-desc" data-i18n="b5_desc">No praktikanta līdz vecākajam viesmilim vai menedžerim.</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#B8966A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="18" height="13" rx="2"/><path d="M15 7V5a4 4 0 0 0-8 0v2"/><line x1="11" y1="12" x2="11" y2="15"/></svg></div>
+      <div class="benefit-title" data-i18n="b6_title">Moderna vide</div>
+      <div class="benefit-desc" data-i18n="b6_desc">Pilnībā atjaunota premium līmeņa zāle un virtuve.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESS ── -->
+<section class="process" id="process">
+  <div class="section-tag" data-i18n="process_tag">Atlases process</div>
+  <h2 class="process-title" data-i18n="process_title">Kā notiek atlase</h2>
+  <p class="process-sub" data-i18n="process_sub">Trīs vienkārši soļi no anketas līdz intervijai.</p>
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">1</div>
+      <div class="step-title" data-i18n="step1_title">Aizpildi anketu</div>
+      <div class="step-desc" data-i18n="step1_desc">Pastāsti par sevi un pieredzi — aizņem 3 minūtes.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">2</div>
+      <div class="step-title" data-i18n="step2_title">Saņem apstiprinājumu</div>
+      <div class="step-desc" data-i18n="step2_desc">Mēs paziņosim, ka anketa pieņemta izskatīšanai.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">3</div>
+      <div class="step-title" data-i18n="step3_title">Sazināsimies personīgi</div>
+      <div class="step-desc" data-i18n="step3_desc">Piemērotos kandidātus aicinām uz interviju klātienē.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FORM ── -->
+<section class="form-section" id="apply">
+  <div class="form-section-inner">
+    <div class="section-tag" style="justify-content:center" data-i18n="form_tag">Kandidāta anketa</div>
+    <h2 class="form-section-title" data-i18n="form_title">Pieteikties vakancei</h2>
+    <p class="form-section-sub" data-i18n="form_sub">Aizpildi anketu un mēs tevi izskatīsim tuvāko 24 stundu laikā.</p>
+
+    <div class="form-widget">
+      <div class="form-progress-bar">
+        <div class="form-progress-fill" id="progressFill" style="width:16.6%"></div>
+      </div>
+      <div class="form-header">
+        <div class="form-step-label" id="stepLabel">Solis 1 no 6</div>
+        <div class="form-step-pct" id="stepPct">17%</div>
+      </div>
+      <div class="form-body" id="formBody">
+        <!-- Steps rendered by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <span>Restaurant N</span> · Rīga, Latvija · <span data-i18n="footer_made">Izgatavots ar rūpību</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const WORKER_URL = "https://floral-tree-d2cb.eusjs56999.workers.dev/";
+const GEMINI_MODEL = "gemini-2.5-flash";
+const TG_BOT_TOKEN = "8716703583:AAFoJRS-by5t2fHC-pZzRMy0vlGiYVCQmYE";
+const TG_CHAT_ID = "8231689704";
+
+// ══════════════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════════════
+const LANGS = {
+  lv: {
+    nav_benefits: "Priekšrocības", nav_process: "Process", nav_apply: "Pieteikties",
+    badge: "Atvērta vakance", hero_title_1: "Viesmīļa vakance",
+    hero_sub: "Aizpildi anketu 3 minūtēs un iziet pirmo atlasi. Mēs novērtēsim tavu pieredzi un sazināsimies personīgi.",
+    salary_label: "Alga", city_label: "Pilsēta", type_label: "Nodarbinātība",
+    fulltime: "Pilna slodze", schedule_label: "Grafiks", shifts: "Maiņu darbs",
+    start_btn: "Sākt anketu",
+    benefits_tag: "Restaurant N", benefits_title: "Kāpēc darbinieki izvēlas mūs",
+    benefits_sub: "Seši iemesli pievienoties komandai, ar kuru viesi lepojas.",
+    b1_title: "Stabila alga", b1_desc: "Caurspīdīgas likmes, dzeramnauda un bonusi laikā.",
+    b2_title: "Elastīgs grafiks", b2_desc: "Cienām tavas studijas, ģimeni un personīgo dzīvi.",
+    b3_title: "Draudzīga komanda", b3_desc: "Uzticības un atbalsta atmosfēra katrā maiņā.",
+    b4_title: "Bezmaksas ēdināšana", b4_desc: "Pilnas maltītes maiņas laikā.",
+    b5_title: "Izaugsmes iespējas", b5_desc: "No praktikanta līdz vecākajam viesmilim vai menedžerim.",
+    b6_title: "Moderna vide", b6_desc: "Pilnībā atjaunota premium līmeņa zāle un virtuve.",
+    process_tag: "Atlases process", process_title: "Kā notiek atlase",
+    process_sub: "Trīs vienkārši soļi no anketas līdz intervijai.",
+    step1_title: "Aizpildi anketu", step1_desc: "Pastāsti par sevi un pieredzi — aizņem 3 minūtes.",
+    step2_title: "Saņem apstiprinājumu", step2_desc: "Mēs paziņosim, ka anketa pieņemta izskatīšanai.",
+    step3_title: "Sazināsimies personīgi", step3_desc: "Piemērotos kandidātus aicinām uz interviju klātienē.",
+    form_tag: "Kandidāta anketa", form_title: "Pieteikties vakancei",
+    form_sub: "Aizpildi anketu un mēs tevi izskatīsim tuvāko 24 stundu laikā.",
+    footer_made: "Izgatavots ar rūpību",
+  },
+  en: {
+    nav_benefits: "Benefits", nav_process: "Process", nav_apply: "Apply",
+    badge: "Open position", hero_title_1: "Waiter vacancy",
+    hero_sub: "Fill in the form in 3 minutes and pass the first screening. We will evaluate your experience and contact you personally.",
+    salary_label: "Salary", city_label: "City", type_label: "Employment",
+    fulltime: "Full-time", schedule_label: "Schedule", shifts: "Shift work",
+    start_btn: "Start application",
+    benefits_tag: "Restaurant N", benefits_title: "Why employees choose us",
+    benefits_sub: "Six reasons to join the team our guests are proud of.",
+    b1_title: "Stable salary", b1_desc: "Transparent rates, tips and bonuses on time.",
+    b2_title: "Flexible schedule", b2_desc: "We respect your studies, family and personal life.",
+    b3_title: "Friendly team", b3_desc: "Trust and support atmosphere in every shift.",
+    b4_title: "Free meals", b4_desc: "Full meals during every shift.",
+    b5_title: "Growth opportunities", b5_desc: "From trainee to senior waiter or manager.",
+    b6_title: "Modern environment", b6_desc: "Fully renovated premium-level hall and kitchen.",
+    process_tag: "Selection process", process_title: "How selection works",
+    process_sub: "Three simple steps from the form to the interview.",
+    step1_title: "Fill in the form", step1_desc: "Tell us about yourself and experience — takes 3 minutes.",
+    step2_title: "Receive confirmation", step2_desc: "We will notify you that your form is received for review.",
+    step3_title: "We contact you personally", step3_desc: "Suitable candidates are invited to an in-person interview.",
+    form_tag: "Candidate form", form_title: "Apply for the position",
+    form_sub: "Fill in the form and we will review you within the next 24 hours.",
+    footer_made: "Made with care",
+  },
+  ru: {
+    nav_benefits: "Преимущества", nav_process: "Процесс", nav_apply: "Подать заявку",
+    badge: "Открытая вакансия", hero_title_1: "Вакансия официанта",
+    hero_sub: "Заполни анкету за 3 минуты и пройди первый отбор. Мы оценим твой опыт и свяжемся лично.",
+    salary_label: "Зарплата", city_label: "Город", type_label: "Занятость",
+    fulltime: "Полная занятость", schedule_label: "График", shifts: "Сменная работа",
+    start_btn: "Начать анкету",
+    benefits_tag: "Restaurant N", benefits_title: "Почему сотрудники выбирают нас",
+    benefits_sub: "Шесть причин присоединиться к команде, которой гордятся гости.",
+    b1_title: "Стабильная зарплата", b1_desc: "Прозрачные ставки, чаевые и бонусы вовремя.",
+    b2_title: "Гибкий график", b2_desc: "Уважаем твою учёбу, семью и личную жизнь.",
+    b3_title: "Дружная команда", b3_desc: "Атмосфера доверия и поддержки в каждой смене.",
+    b4_title: "Бесплатное питание", b4_desc: "Полноценное питание во время каждой смены.",
+    b5_title: "Возможности роста", b5_desc: "От стажёра до старшего официанта или менеджера.",
+    b6_title: "Современная среда", b6_desc: "Полностью обновлённый зал и кухня премиум-класса.",
+    process_tag: "Процесс отбора", process_title: "Как происходит отбор",
+    process_sub: "Три простых шага от анкеты до собеседования.",
+    step1_title: "Заполни анкету", step1_desc: "Расскажи о себе и опыте — займёт 3 минуты.",
+    step2_title: "Получи подтверждение", step2_desc: "Мы уведомим тебя о получении анкеты на рассмотрение.",
+    step3_title: "Свяжемся лично", step3_desc: "Подходящих кандидатов приглашаем на личное собеседование.",
+    form_tag: "Анкета кандидата", form_title: "Подать заявку на вакансию",
+    form_sub: "Заполни анкету и мы рассмотрим тебя в течение 24 часов.",
+    footer_made: "Сделано с заботой",
+  }
+};
+
+let currentLang = 'lv';
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (LANGS[lang][key]) el.textContent = LANGS[lang][key];
+  });
+  renderStep();
+}
+
+// ══════════════════════════════════════════════════════
+// FORM STATE
+// ══════════════════════════════════════════════════════
+let currentStep = 0;
+const TOTAL_STEPS = 6;
+
+const formData = {
+  firstName: '', lastName: '', phone: '', email: '', age: '',
+  experienceYears: '', lastWorkplace: '', lastPosition: '',
+  languages: { lv: '', ru: '', en: '' },
+  extraLanguages: '',
+  evenings: false, weekends: false, fullDay: false,
+  aiAnswers: {}
+};
+
+let aiQuestions = [];
+
+// ══════════════════════════════════════════════════════
+// STEP LABELS
+// ══════════════════════════════════════════════════════
+const stepLabels = {
+  lv: ['Personas dati', 'Darba pieredze', 'Valodas', 'Grafiks', 'AI precizēšana', 'Konfirmācija'],
+  en: ['Personal data', 'Work experience', 'Languages', 'Schedule', 'AI clarification', 'Confirmation'],
+  ru: ['Личные данные', 'Опыт работы', 'Языки', 'График', 'Уточнение ИИ', 'Подтверждение']
+};
+
+const stepOf = { lv: 'no', en: 'of', ru: 'из' };
+
+// ══════════════════════════════════════════════════════
+// RENDER ENGINE
+// ══════════════════════════════════════════════════════
+function updateProgress() {
+  const pct = Math.round(((currentStep + 1) / TOTAL_STEPS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepPct').textContent = pct + '%';
+  const labels = stepLabels[currentLang];
+  const ofWord = stepOf[currentLang];
+  document.getElementById('stepLabel').textContent = `${labels[currentStep]} · ${currentLang === 'lv' ? 'Solis' : currentLang === 'en' ? 'Step' : 'Шаг'} ${currentStep + 1} ${ofWord} ${TOTAL_STEPS}`;
+}
+
+function renderStep() {
+  updateProgress();
+  const body = document.getElementById('formBody');
+  body.classList.remove('fade-in');
+  void body.offsetWidth;
+  body.classList.add('fade-in');
+
+  switch(currentStep) {
+    case 0: renderPersonal(); break;
+    case 1: renderExperience(); break;
+    case 2: renderLanguages(); break;
+    case 3: renderSchedule(); break;
+    case 4: renderAI(); break;
+    case 5: renderConfirm(); break;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 1 — PERSONAL
+// ══════════════════════════════════════════════════════
+function renderPersonal() {
+  const t = {
+    lv: { title: 'Personas dati', desc: 'Lai mēs varētu ar tevi sazināties.', first: 'Vārds', last: 'Uzvārds', phone: 'Telefons', email: 'E-pasts', age: 'Vecums', ph_age: 'piemēram, 24', next: 'Tālāk' },
+    en: { title: 'Personal details', desc: 'So we can get in touch with you.', first: 'First name', last: 'Last name', phone: 'Phone', email: 'Email', age: 'Age', ph_age: 'e.g. 24', next: 'Next' },
+    ru: { title: 'Личные данные', desc: 'Чтобы мы могли с тобой связаться.', first: 'Имя', last: 'Фамилия', phone: 'Телефон', email: 'E-mail', age: 'Возраст', ph_age: 'напр. 24', next: 'Далее' }
+  }[currentLang];
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+    <div class="field-row">
+      <div class="field-group">
+        <label>${t.first} *</label>
+        <input type="text" id="f_firstName" value="${formData.firstName}" placeholder="Anna">
+      </div>
+      <div class="field-group">
+        <label>${t.last} *</label>
+        <input type="text" id="f_lastName" value="${formData.lastName}" placeholder="Bērziņa">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label>${t.phone} *</label>
+        <input type="tel" id="f_phone" value="${formData.phone}" placeholder="+371 xxxxxxxx">
+      </div>
+      <div class="field-group">
+        <label>${t.email} *</label>
+        <input type="email" id="f_email" value="${formData.email}" placeholder="anna@gmail.com">
+      </div>
+    </div>
+    <div class="field-row single">
+      <div class="field-group">
+        <label>${t.age}</label>
+        <input type="number" id="f_age" value="${formData.age}" placeholder="${t.ph_age}" min="16" max="80">
+      </div>
+    </div>
+    ${navButtons(false, t.next)}
+  `;
+  bindNav(validatePersonal);
+}
+
+function validatePersonal() {
+  const fields = ['firstName','lastName','phone','email'];
+  const ids = ['f_firstName','f_lastName','f_phone','f_email'];
+  let ok = true;
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    const val = el.value.trim();
+    formData[fields[i]] = val;
+    if (!val) { el.classList.add('error'); ok = false; } else el.classList.remove('error');
+  });
+  formData.age = document.getElementById('f_age').value;
+  return ok;
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 2 — EXPERIENCE
+// ══════════════════════════════════════════════════════
+function renderExperience() {
+  const t = {
+    lv: { title: 'Darba pieredze', desc: 'Pastāsti par savu pieredzi restorānu jomā.', exp: 'Cik gadu pieredzes?', opts: ['Nav pieredzes', 'Līdz 1 gadam', '1–3 gadi', 'Vairāk kā 3 gadi'], last: 'Pēdējā darba vieta', pos: 'Amats (pēdējā darba vietā)', next: 'Tālāk' },
+    en: { title: 'Work experience', desc: 'Tell us about your experience in hospitality.', exp: 'How many years of experience?', opts: ['No experience', 'Up to 1 year', '1–3 years', 'More than 3 years'], last: 'Last workplace', pos: 'Position (last workplace)', next: 'Next' },
+    ru: { title: 'Опыт работы', desc: 'Расскажи о своём опыте в ресторанной сфере.', exp: 'Сколько лет опыта?', opts: ['Нет опыта', 'До 1 года', '1–3 года', 'Более 3 лет'], last: 'Последнее место работы', pos: 'Должность (последнее место)', next: 'Далее' }
+  }[currentLang];
+
+  const pills = t.opts.map((o, i) => `
+    <label class="pill ${formData.experienceYears === o ? 'selected' : ''}" onclick="selectPill(this,'experienceYears','${o}')">
+      <input type="radio" name="exp">${o}
+    </label>`).join('');
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+    <div class="field-group" style="margin-bottom:24px">
+      <label>${t.exp} *</label>
+      <div class="pill-group" id="exp_pills">${pills}</div>
+      <div class="error-msg" id="exp_err" style="display:none">${currentLang==='ru'?'Выбери вариант':currentLang==='en'?'Please select an option':'Lūdzu izvēlies variantu'}</div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label>${t.last}</label>
+        <input type="text" id="f_workplace" value="${formData.lastWorkplace}" placeholder="Café Rīga">
+      </div>
+      <div class="field-group">
+        <label>${t.pos}</label>
+        <input type="text" id="f_position" value="${formData.lastPosition}" placeholder="${currentLang==='ru'?'Официант':currentLang==='en'?'Waiter':'Viesmilis'}">
+      </div>
+    </div>
+    ${navButtons(true, t.next)}
+  `;
+  bindNav(validateExperience);
+}
+
+function selectPill(el, field, value) {
+  formData[field] = value;
+  el.closest('.pill-group').querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function validateExperience() {
+  const err = document.getElementById('exp_err');
+  if (!formData.experienceYears) { err.style.display = 'block'; return false; }
+  err.style.display = 'none';
+  formData.lastWorkplace = document.getElementById('f_workplace').value.trim();
+  formData.lastPosition = document.getElementById('f_position').value.trim();
+  return true;
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 3 — LANGUAGES
+// ══════════════════════════════════════════════════════
+function renderLanguages() {
+  const t = {
+    lv: { title: 'Valodu prasmes', desc: 'Norādi savu valodu līmeni.', levels: ['Nav','Pamata','Vidējs','Labs','Teicams'], extra: 'Citas valodas (pēc izvēles)', next: 'Tālāk' },
+    en: { title: 'Language skills', desc: 'Indicate your language level.', levels: ['None','Basic','Intermediate','Good','Excellent'], extra: 'Other languages (optional)', next: 'Next' },
+    ru: { title: 'Языковые навыки', desc: 'Укажи свой уровень владения языками.', levels: ['Нет','Базовый','Средний','Хороший','Отличный'], extra: 'Другие языки (по желанию)', next: 'Далее' }
+  }[currentLang];
+
+  const langNames = { lv: { lv: 'Latviešu', ru: 'Krievu', en: 'Angļu' }, en: { lv: 'Latvian', ru: 'Russian', en: 'English' }, ru: { lv: 'Латышский', ru: 'Русский', en: 'Английский' } }[currentLang];
+
+  const langRows = ['lv','ru','en'].map(lang => {
+    const levelPills = t.levels.map(lvl => `
+      <label class="pill ${formData.languages[lang] === lvl ? 'selected' : ''}" onclick="selectLangLevel(this,'${lang}','${lvl}')">
+        <input type="radio">${lvl}
+      </label>`).join('');
+    return `
+      <div class="lang-item">
+        <div class="lang-name">${langNames[lang]}</div>
+        <div class="pill-group">${levelPills}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+    <div style="margin-bottom:24px">${langRows}</div>
+    <div class="field-group">
+      <label>${t.extra}</label>
+      <input type="text" id="f_extraLangs" value="${formData.extraLanguages}" placeholder="${currentLang==='ru'?'Немецкий — базовый':currentLang==='en'?'German — basic':'Vācu — pamata'}">
+    </div>
+    ${navButtons(true, t.next)}
+  `;
+  bindNav(() => {
+    formData.extraLanguages = document.getElementById('f_extraLangs').value.trim();
+    return true;
+  });
+}
+
+function selectLangLevel(el, lang, level) {
+  formData.languages[lang] = level;
+  el.closest('.pill-group').querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 4 — SCHEDULE
+// ══════════════════════════════════════════════════════
+function renderSchedule() {
+  const t = {
+    lv: { title: 'Darba grafiks', desc: 'Pastāsti, kāds grafiks tev ir piemērots.', eve: 'Esmu gatavs strādāt vakarios', wknd: 'Esmu gatavs strādāt brīvdienās', full: 'Esmu gatavs strādāt pilnu dienu', next: 'Tālāk' },
+    en: { title: 'Work schedule', desc: 'Tell us what schedule works for you.', eve: 'I can work evenings', wknd: 'I can work weekends', full: 'I can work full day', next: 'Next' },
+    ru: { title: 'График работы', desc: 'Расскажи, какой график тебе подходит.', eve: 'Готов работать вечерами', wknd: 'Готов работать в выходные', full: 'Готов работать полный день', next: 'Далее' }
+  }[currentLang];
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+    <div style="margin-bottom:32px">
+      <div class="toggle-row">
+        <span class="toggle-label">${t.eve}</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog_eve" ${formData.evenings?'checked':''}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">${t.wknd}</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog_wknd" ${formData.weekends?'checked':''}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">${t.full}</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog_full" ${formData.fullDay?'checked':''}>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    ${navButtons(true, t.next)}
+  `;
+  bindNav(() => {
+    formData.evenings = document.getElementById('tog_eve').checked;
+    formData.weekends = document.getElementById('tog_wknd').checked;
+    formData.fullDay = document.getElementById('tog_full').checked;
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 5 — AI QUESTIONS
+// ══════════════════════════════════════════════════════
+async function renderAI() {
+  const body = document.getElementById('formBody');
+  const loadText = {
+    lv: { loading: 'Analizējam tavas atbildes...', sub: 'Mākslīgais intelekts sagatavo precizējošus jautājumus' },
+    en: { loading: 'Analysing your answers...', sub: 'AI is preparing clarifying questions' },
+    ru: { loading: 'Анализируем твои ответы...', sub: 'ИИ готовит уточняющие вопросы' }
+  }[currentLang];
+
+  body.innerHTML = `
+    <div class="ai-loading">
+      <div class="ai-spinner"></div>
+      <div class="ai-loading-text">${loadText.loading}</div>
+      <div class="ai-loading-sub">${loadText.sub}</div>
+    </div>
+  `;
+
+  try {
+    const prompt = buildAIPrompt();
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'gemini',
+        model: GEMINI_MODEL,
+        prompt: prompt
+      })
+    });
+    const data = await resp.json();
+    const text = extractGeminiText(data);
+    aiQuestions = parseAIQuestions(text);
+  } catch(e) {
+    aiQuestions = getFallbackQuestions();
+  }
+
+  renderAIQuestions();
+}
+
+function buildAIPrompt() {
+  const langName = { lv: 'latviešu', en: 'English', ru: 'русском' }[currentLang];
+  const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ');
+
+  return `Tu esi pieklājīgs HR asistents restorānam. Tev jāuzdod kandidātam 2-3 precizējoši jautājumi, pamatojoties uz viņa anketas datiem.
+
+SVARĪGI:
+- Jautājumi jāraksta ${langName} valodā
+- Nekad nejautā par vecumu, dzimumu, ģimenes stāvokli, bērniem, veselību, nacionālitāti, reliģiju vai politiskiem uzskatiem
+- Jautājumi ir draudzīgi, profesionāli, kodolīgi
+- Jautā tikai par darba pieredzi, motivāciju, prasmes
+- Atbildi TIKAI ar JSON formātu: {"questions": ["jautājums 1", "jautājums 2", "jautājums 3"]}
+
+KANDIDĀTA DATI:
+- Vārds: ${formData.firstName}
+- Pieredze: ${formData.experienceYears}
+- Pēdējā darba vieta: ${formData.lastWorkplace || 'nav norādīts'}
+- Pēdējais amats: ${formData.lastPosition || 'nav norādīts'}
+- Valodas: ${langs || 'nav norādīts'}
+- Vakara maiņas: ${formData.evenings ? 'jā' : 'nē'}
+- Brīvdienas: ${formData.weekends ? 'jā' : 'nē'}
+- Pilna diena: ${formData.fullDay ? 'jā' : 'nē'}
+
+Uzdod 2-3 konkrētus precizējošus jautājumus par pieredzi vai motivāciju. JSON only, nekāds cits teksts.`;
+}
+
+function parseAIQuestions(text) {
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    return parsed.questions || getFallbackQuestions();
+  } catch {
+    const lines = text.split('\n').filter(l => l.trim().endsWith('?'));
+    return lines.length ? lines.slice(0,3) : getFallbackQuestions();
+  }
+}
+
+function getFallbackQuestions() {
+  return {
+    lv: ['Ko tevi piesaista darbam restorānā tieši šobrīd?', 'Kādu situāciju ar prasīgu viesi esi atrisinājis? Kā tu to izdarīji?'],
+    en: ['What attracts you to restaurant work right now?', 'Can you describe a situation with a demanding guest and how you handled it?'],
+    ru: ['Что привлекает тебя в работе в ресторане именно сейчас?', 'Расскажи о ситуации с требовательным гостем и как ты её решил?']
+  }[currentLang];
+}
+
+function renderAIQuestions() {
+  const t = {
+    lv: { title: 'Daži precizējoši jautājumi', desc: 'Mākslīgais intelekts sagatavoja šos jautājumus, balstoties uz tavām atbildēm.', tag: 'AI jautājums', next: 'Turpināt', ph: 'Tava atbilde...' },
+    en: { title: 'A few clarifying questions', desc: 'AI prepared these questions based on your answers.', tag: 'AI question', next: 'Continue', ph: 'Your answer...' },
+    ru: { title: 'Несколько уточняющих вопросов', desc: 'ИИ подготовил эти вопросы на основе твоих ответов.', tag: 'Вопрос от ИИ', next: 'Продолжить', ph: 'Твой ответ...' }
+  }[currentLang];
+
+  const qHtml = aiQuestions.map((q, i) => `
+    <div class="ai-question">
+      <div class="ai-question-label">◆ ${t.tag} ${i+1}</div>
+      <div class="ai-question-text">${q}</div>
+      <textarea id="ai_ans_${i}" placeholder="${t.ph}" rows="3">${formData.aiAnswers[i]||''}</textarea>
+    </div>
+  `).join('');
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+    ${qHtml}
+    ${navButtons(true, t.next)}
+  `;
+
+  bindNav(() => {
+    aiQuestions.forEach((q, i) => {
+      formData.aiAnswers[i] = { question: q, answer: document.getElementById(`ai_ans_${i}`).value.trim() };
+    });
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 6 — CONFIRM + SEND
+// ══════════════════════════════════════════════════════
+function renderConfirm() {
+  const t = {
+    lv: { title: 'Apstiprini pieteikumu', desc: 'Pārskatīt savas atbildes un nosūtīt pieteikumu.', privacy_sum: 'Tavi dati tiks izmantoti tikai kandidatūras novērtēšanai un nosūtīti tikai šim darba devējam. Tie netiks saglabāti mūsu serveros pēc ziņojuma nosūtīšanas. Darba devējs ir atbildīgs par saņemto datu glabāšanu.', privacy_more: 'Lasīt pilnu privātuma politiku', consent: 'Es brīvprātīgi piekrītu sniegt savus datus kandidatūras novērtēšanai. Saprotu, ka telefona numurs tiks izmantots tikai saziņai par šo vakanci.', send: 'Nosūtīt pieteikumu', back: 'Atpakaļ', privacy_full: 'Tavi personas dati (vārds, kontakti, pieredze) tiek apstrādāti, lai novērtētu tavu kandidatūru vakancē Restaurant N. Dati tiek nodoti tikai atbildīgajam darba devējam un netiek pārdoti vai nodoti trešajām pusēm. Pēc ziņojuma nosūtīšanas dati netiek glabāti mūsu sistēmās. Darba devējs glabā saņemtos datus saskaņā ar GDPR. Ja vēlies atsaukt piekrišanu, raksti uz mums.' },
+    en: { title: 'Confirm your application', desc: 'Review your answers and submit your application.', privacy_sum: 'Your data will only be used to evaluate your candidacy and sent only to this employer. It will not be stored on our servers after the report is sent. The employer is responsible for storing received data.', privacy_more: 'Read full privacy policy', consent: 'I voluntarily agree to provide my data for candidacy evaluation. I understand my phone number will only be used to contact me about this vacancy.', send: 'Submit application', back: 'Back', privacy_full: 'Your personal data (name, contacts, experience) is processed to evaluate your candidacy for the Restaurant N vacancy. Data is only passed to the responsible employer and is not sold or shared with third parties. After the report is sent, data is not retained in our systems. The employer stores received data in accordance with GDPR. To withdraw consent, contact us.' },
+    ru: { title: 'Подтверди заявку', desc: 'Проверь свои ответы и отправь заявку.', privacy_sum: 'Твои данные будут использованы только для оценки кандидатуры и переданы только этому работодателю. Они не сохраняются на наших серверах после отправки. Работодатель несёт ответственность за хранение полученных данных.', privacy_more: 'Читать полную политику конфиденциальности', consent: 'Я добровольно соглашаюсь предоставить свои данные для оценки кандидатуры. Понимаю, что номер телефона будет использован только для связи по данной вакансии.', send: 'Отправить заявку', back: 'Назад', privacy_full: 'Твои персональные данные (имя, контакты, опыт) обрабатываются для оценки твоей кандидатуры на вакансию в Restaurant N. Данные передаются только ответственному работодателю и не продаются третьим лицам. После отправки сообщения данные не хранятся в наших системах. Работодатель хранит полученные данные согласно GDPR. Для отзыва согласия свяжись с нами.' }
+  }[currentLang];
+
+  document.getElementById('formBody').innerHTML = `
+    <h3 class="form-step-title">${t.title}</h3>
+    <p class="form-step-desc">${t.desc}</p>
+
+    <div class="privacy-box">
+      <div class="privacy-summary">${t.privacy_sum}</div>
+      <div class="privacy-details" id="privacyFull">${t.privacy_full}</div>
+      <button class="privacy-toggle-link" onclick="togglePrivacy()">${t.privacy_more}</button>
+      <div class="consent-row">
+        <input type="checkbox" id="consent_cb">
+        <span class="consent-text">${t.consent}</span>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevStep()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 7H4M7 10L4 7l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        ${t.back}
+      </button>
+      <button class="btn-next" id="submitBtn" onclick="submitForm()">
+        ${t.send}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7h6M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  `;
+}
+
+function togglePrivacy() {
+  const el = document.getElementById('privacyFull');
+  el.classList.toggle('open');
+}
+
+async function submitForm() {
+  const cb = document.getElementById('consent_cb');
+  if (!cb.checked) {
+    cb.style.outline = '2px solid var(--error)';
+    setTimeout(() => cb.style.outline = '', 2000);
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = currentLang === 'ru' ? 'Отправка...' : currentLang === 'en' ? 'Sending...' : 'Sūta...';
+
+  try {
+    const report = await generateReport();
+    await sendToTelegram(report);
+    renderSuccess();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = currentLang === 'ru' ? 'Попробовать снова' : currentLang === 'en' ? 'Try again' : 'Mēģināt vēlreiz';
+    console.error(e);
+  }
+}
+
+async function generateReport() {
+  const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ') || '—';
+  const aiSection = Object.values(formData.aiAnswers).map((qa, i) => `Jautājums ${i+1}: ${qa.question}\nAtbilde: ${qa.answer}`).join('\n\n');
+
+  const prompt = `Tu esi profesionāls HR speciālists. Uzraksti darba devējam īsu, bet informatīvu novērtējumu par kandidātu. Raksti vienkāršā latviešu valodā, bez emoji, bez techniskiem apzīmējumiem. Teksts jāraksta tā, kā cilvēks rakstītu cilvēkam.
+
+KANDIDĀTA DATI:
+Vārds: ${formData.firstName} ${formData.lastName}
+Tālrunis: ${formData.phone}
+E-pasts: ${formData.email}
+${formData.age ? 'Vecums: ' + formData.age : ''}
+Pieredze: ${formData.experienceYears}
+Pēdējā darba vieta: ${formData.lastWorkplace || '—'}
+Pēdējais amats: ${formData.lastPosition || '—'}
+Valodas: ${langs}
+${formData.extraLanguages ? 'Citas valodas: ' + formData.extraLanguages : ''}
+Vakari: ${formData.evenings?'jā':'nē'}, Brīvdienas: ${formData.weekends?'jā':'nē'}, Pilna diena: ${formData.fullDay?'jā':'nē'}
+
+AI JAUTĀJUMI UN ATBILDES:
+${aiSection || 'Nav'}
+
+Uzraksti novērtējumu šādā struktūrā (tikai teksts, bez markdown, bez headeriem ar #):
+
+ĪSAIS NOVĒRTĒJUMS
+[2-3 teikumi: vai vērts aicināt uz interviju un kāpēc]
+
+PIEMĒROTĪBAS PROCENTS
+[skaitlis no 0 līdz 100]% — [īss pamatojums]
+
+KAS PATIKA
+[2-4 konkrēti plusi par šo kandidātu]
+
+KAM PIEVĒRST UZMANĪBU
+[1-3 lietas, ko noskaidrot intervijā, vai trūkumi]
+
+AI JAUTĀJUMU ATBILŽU ANALĪZE
+[īss secinājums par to, kā kandidāts atbildēja uz precizējošajiem jautājumiem]
+
+GALA IETEIKUMS
+[skaidrs ieteikums: aicināt vai nē, un kāpēc]`;
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'gemini', model: GEMINI_MODEL, prompt })
+    });
+    const data = await resp.json();
+    return extractGeminiText(data) || buildFallbackReport();
+  } catch {
+    return buildFallbackReport();
+  }
+}
+
+function extractGeminiText(data) {
+  try {
+    // Raw Google Gemini API response format
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return data.candidates[0].content.parts[0].text || '';
+    }
+    // Fallback for other possible formats
+    return data.text || data.response || '';
+  } catch(e) {
+    return '';
+  }
+}
+
+function buildFallbackReport() {
+  return `Jauns kandidāts: ${formData.firstName} ${formData.lastName}\nTālrunis: ${formData.phone}\nE-pasts: ${formData.email}\nPieredze: ${formData.experienceYears}\nLūdzu izskatīt manuāli.`;
+}
+
+async function sendToTelegram(reportText) {
+  const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Net').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ') || '-';
+
+  const shortMsg = [
+    'JAUNS KANDIDATS',
+    '',
+    'Vards: ' + formData.firstName + ' ' + formData.lastName,
+    'Amats: Viesmilis, Restaurant N',
+    'Telefons: ' + formData.phone,
+    'E-pasts: ' + formData.email,
+    'Pieredze: ' + formData.experienceYears,
+    'Valodas: ' + langs,
+    '',
+    'Pilns novertejums seko zemak.'
+  ].join('\n');
+
+  const fullMsg = [
+    'PILNS NOVERTEJUMS',
+    '',
+    'Kandidats: ' + formData.firstName + ' ' + formData.lastName,
+    'Telefons: ' + formData.phone,
+    'E-pasts: ' + formData.email,
+    (formData.age ? 'Vecums: ' + formData.age : ''),
+    '',
+    reportText
+  ].filter(Boolean).join('\n');
+
+  // Send short message with button
+  await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: TG_CHAT_ID,
+      text: shortMsg,
+      reply_markup: {
+        inline_keyboard: [[{ text: 'Pilns novertejums', callback_data: 'full_' + Date.now() }]]
+      }
+    })
+  });
+
+  // Send full report in chunks
+  const chunks = chunkText(fullMsg, 4000);
+  for (const chunk of chunks) {
+    await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: chunk })
+    });
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+function chunkText(text, size) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += size) {
+    chunks.push(text.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function renderSuccess() {
+  const t = {
+    lv: { title: 'Paldies, anketa saņemta!', desc: 'Mēs izskatīsim tavu pieteikumu tuvāko 24 stundu laikā un, ja tava kandidatūra atbilst prasībām, sazināsimies ar tevi personīgi.' },
+    en: { title: 'Thank you, application received!', desc: 'We will review your application within the next 24 hours and, if your candidacy meets the requirements, we will contact you personally.' },
+    ru: { title: 'Спасибо, заявка получена!', desc: 'Мы рассмотрим твою заявку в течение 24 часов и, если твоя кандидатура соответствует требованиям, свяжемся с тобой лично.' }
+  }[currentLang];
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('stepPct').textContent = '100%';
+  document.getElementById('stepLabel').textContent = '✓';
+
+  document.getElementById('formBody').innerHTML = `
+    <div class="success-screen fade-in">
+      <div class="success-icon">✓</div>
+      <h3 class="success-title">${t.title}</h3>
+      <p class="success-desc">${t.desc}</p>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// NAV HELPERS
+// ══════════════════════════════════════════════════════
+function navButtons(showBack, nextLabel) {
+  const backLabel = { lv: 'Atpakaļ', en: 'Back', ru: 'Назад' }[currentLang];
+  return `
+    <div class="form-nav">
+      <button class="btn-back" id="btn_back" ${!showBack?'disabled':''} onclick="prevStep()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 7H4M7 10L4 7l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        ${backLabel}
+      </button>
+      <button class="btn-next" id="btn_next" onclick="nextStep()">
+        ${nextLabel}
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7h6M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  `;
+}
+
+let validateFn = null;
+
+function bindNav(fn) {
+  validateFn = fn;
+}
+
+function nextStep() {
+  if (validateFn && !validateFn()) return;
+  if (currentStep < TOTAL_STEPS - 1) {
+    currentStep++;
+    renderStep();
+    document.getElementById('apply').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderStep();
+    document.getElementById('apply').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+renderStep();
+</script>
+</body>
+</html>

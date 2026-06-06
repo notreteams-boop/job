@@ -841,7 +841,7 @@ span[data-lang].active { display: inline; }
 // ══════════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════════
-const WORKER_URL = "https://quiet-moon-b141.eusjs56999.workers.dev/";
+const WORKER_URL = "https://floral-tree-d2cb.eusjs56999.workers.dev/";
 const GEMINI_MODEL = "gemini-2.5-flash";
 const TG_BOT_TOKEN = "8716703583:AAFoJRS-by5t2fHC-pZzRMy0vlGiYVCQmYE";
 const TG_CHAT_ID = "8231689704";
@@ -1245,49 +1245,41 @@ function renderSchedule() {
 // STEPS 5 & 6 — AI QUESTIONS (two rounds)
 // ══════════════════════════════════════════════════════
 async function renderAI(round) {
-  const body = document.getElementById('formBody');
-  const loadText = {
-    lv: { loading: 'Sagatavojam jautājumus...', sub: 'Tas var aiznemt dažas sekundes' },
-    en: { loading: 'Preparing questions...', sub: 'This may take a few seconds' },
-    ru: { loading: 'Подготавливаем вопросы...', sub: 'Это займет несколько секунд' }
-  }[currentLang];
+  var bodyEl = document.getElementById('formBody');
 
-  // If we already have questions for this round, skip API call
-  const existingQ = round === 1 ? aiQuestions1 : aiQuestions2;
+  var existingQ = round === 1 ? aiQuestions1 : aiQuestions2;
   if (existingQ && existingQ.length > 0) {
     renderAIQuestions(round);
     return;
   }
 
-  body.innerHTML = `
-    <div class="ai-loading">
-      <div class="ai-spinner"></div>
-      <div class="ai-loading-text">${loadText.loading}</div>
-      <div class="ai-loading-sub">${loadText.sub}</div>
-    </div>
-  `;
+  var loadingText = currentLang === 'ru' ? 'Подготавливаем вопросы...' : currentLang === 'en' ? 'Preparing questions...' : 'Sagatavojam jautājumus...';
+  var loadingSub = currentLang === 'ru' ? 'Это займёт несколько секунд' : currentLang === 'en' ? 'This may take a few seconds' : 'Tas var aizņemt dažas sekundes';
+  bodyEl.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-text">' + loadingText + '</div><div class="ai-loading-sub">' + loadingSub + '</div></div>';
 
+  var questions = getFallbackQuestions(round);
   try {
-    const prompt = buildAIPrompt(round);
-    const resp = await fetch(WORKER_URL, {
+    var prompt = buildAIPrompt(round);
+    var resp = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'gemini', model: GEMINI_MODEL, prompt })
+      body: JSON.stringify({ model: GEMINI_MODEL, prompt: prompt })
     });
-    const data = await resp.json();
-    const text = extractGeminiText(data);
-    const questions = parseAIQuestions(text, round);
-    if (round === 1) aiQuestions1 = questions;
-    else aiQuestions2 = questions;
+    var data = await resp.json();
+    var text = extractGeminiText(data);
+    if (text && text.length > 10) {
+      var parsed = parseAIQuestions(text, round);
+      if (parsed && parsed.length >= 2) questions = parsed;
+    }
   } catch(e) {
-    const fallback = getFallbackQuestions(round);
-    if (round === 1) aiQuestions1 = fallback;
-    else aiQuestions2 = fallback;
+    // fallback already set above
   }
+
+  if (round === 1) aiQuestions1 = questions;
+  else aiQuestions2 = questions;
 
   renderAIQuestions(round);
 }
-
 function buildAIPrompt(round) {
   const langName = { lv: 'latviešu', en: 'English', ru: 'русском' }[currentLang];
   const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ');
@@ -1515,7 +1507,7 @@ GALA IETEIKUMS
     const resp = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'gemini', model: GEMINI_MODEL, prompt })
+      body: JSON.stringify({ model: GEMINI_MODEL, prompt: prompt })
     });
     const data = await resp.json();
     return extractGeminiText(data) || buildFallbackReport();

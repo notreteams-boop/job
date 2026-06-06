@@ -939,7 +939,7 @@ function setLang(lang) {
 // FORM STATE
 // ══════════════════════════════════════════════════════
 let currentStep = 0;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const formData = {
   firstName: '', lastName: '', phone: '', email: '', age: '',
@@ -947,18 +947,20 @@ const formData = {
   languages: { lv: '', ru: '', en: '' },
   extraLanguages: '',
   evenings: false, weekends: false, fullDay: false,
-  aiAnswers: {}
+  aiAnswers1: {},
+  aiAnswers2: {}
 };
 
-let aiQuestions = [];
+let aiQuestions1 = [];
+let aiQuestions2 = [];
 
 // ══════════════════════════════════════════════════════
 // STEP LABELS
 // ══════════════════════════════════════════════════════
 const stepLabels = {
-  lv: ['Personas dati', 'Darba pieredze', 'Valodas', 'Grafiks', 'AI precizēšana', 'Konfirmācija'],
-  en: ['Personal data', 'Work experience', 'Languages', 'Schedule', 'AI clarification', 'Confirmation'],
-  ru: ['Личные данные', 'Опыт работы', 'Языки', 'График', 'Уточнение ИИ', 'Подтверждение']
+  lv: ['Personas dati', 'Darba pieredze', 'Valodas', 'Grafiks', 'Jautājumi', 'Jautājumi', 'Konfirmācija'],
+  en: ['Personal data', 'Work experience', 'Languages', 'Schedule', 'Questions', 'Questions', 'Confirmation'],
+  ru: ['Личные данные', 'Опыт работы', 'Языки', 'График', 'Вопросы', 'Вопросы', 'Подтверждение']
 };
 
 const stepOf = { lv: 'no', en: 'of', ru: 'из' };
@@ -987,8 +989,9 @@ function renderStep() {
     case 1: renderExperience(); break;
     case 2: renderLanguages(); break;
     case 3: renderSchedule(); break;
-    case 4: renderAI(); break;
-    case 5: renderConfirm(); break;
+    case 4: renderAI(1); break;
+    case 5: renderAI(2); break;
+    case 6: renderConfirm(); break;
   }
 }
 
@@ -1019,10 +1022,12 @@ function renderPersonal() {
       <div class="field-group">
         <label>${t.phone} *</label>
         <input type="tel" id="f_phone" value="${formData.phone}" placeholder="+371 xxxxxxxx">
+        <div class="error-msg" id="err_phone" style="display:none"></div>
       </div>
       <div class="field-group">
         <label>${t.email} *</label>
         <input type="email" id="f_email" value="${formData.email}" placeholder="anna@gmail.com">
+        <div class="error-msg" id="err_email" style="display:none"></div>
       </div>
     </div>
     <div class="field-row single">
@@ -1037,15 +1042,56 @@ function renderPersonal() {
 }
 
 function validatePersonal() {
-  const fields = ['firstName','lastName','phone','email'];
-  const ids = ['f_firstName','f_lastName','f_phone','f_email'];
   let ok = true;
-  ids.forEach((id, i) => {
+
+  // Name fields
+  ['f_firstName','f_lastName'].forEach((id, i) => {
     const el = document.getElementById(id);
     const val = el.value.trim();
-    formData[fields[i]] = val;
+    if (id === 'f_firstName') formData.firstName = val;
+    else formData.lastName = val;
     if (!val) { el.classList.add('error'); ok = false; } else el.classList.remove('error');
   });
+
+  // Phone validation: strip non-digits, must have 7-15 digits
+  const phoneEl = document.getElementById('f_phone');
+  const phoneRaw = phoneEl.value.trim();
+  const phoneDigits = phoneRaw.replace(/[^0-9]/g, '');
+  const phoneErrEl = document.getElementById('err_phone');
+  if (!phoneRaw) {
+    phoneEl.classList.add('error');
+    if (phoneErrEl) phoneErrEl.style.display = 'block';
+    phoneErrEl && (phoneErrEl.textContent = currentLang==='ru'?'Введи номер телефона':currentLang==='en'?'Enter phone number':'Ievadi telefona numuru');
+    ok = false;
+  } else if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    phoneEl.classList.add('error');
+    if (phoneErrEl) { phoneErrEl.style.display = 'block'; phoneErrEl.textContent = currentLang==='ru'?'Некорректный номер (7-15 цифр)':currentLang==='en'?'Invalid number (7-15 digits)':'Nederigs numurs (7-15 cipari)'; }
+    ok = false;
+  } else {
+    phoneEl.classList.remove('error');
+    if (phoneErrEl) phoneErrEl.style.display = 'none';
+    formData.phone = phoneRaw;
+  }
+
+  // Email validation: must have @, valid domain with dot
+  const emailEl = document.getElementById('f_email');
+  const emailVal = emailEl.value.trim();
+  const emailErrEl = document.getElementById('err_email');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailVal) {
+    emailEl.classList.add('error');
+    if (emailErrEl) { emailErrEl.style.display = 'block'; emailErrEl.textContent = currentLang==='ru'?'Введи email':currentLang==='en'?'Enter email':'Ievadi e-pastu'; }
+    ok = false;
+  } else if (!emailRegex.test(emailVal)) {
+    emailEl.classList.add('error');
+    if (emailErrEl) { emailErrEl.style.display = 'block'; emailErrEl.textContent = currentLang==='ru'?'Некорректный email (напр. anna@gmail.com)':currentLang==='en'?'Invalid email (e.g. anna@gmail.com)':'Nederigs e-pasts (piem. anna@gmail.com)'; }
+    ok = false;
+  } else {
+    emailEl.classList.remove('error');
+    if (emailErrEl) emailErrEl.style.display = 'none';
+    formData.email = emailVal;
+  }
+
   formData.age = document.getElementById('f_age').value;
   return ok;
 }
@@ -1108,9 +1154,9 @@ function validateExperience() {
 // ══════════════════════════════════════════════════════
 function renderLanguages() {
   const t = {
-    lv: { title: 'Valodu prasmes', desc: 'Norādi savu valodu līmeni.', levels: ['Nav','Pamata','Vidējs','Labs','Teicams'], extra: 'Citas valodas (pēc izvēles)', next: 'Tālāk' },
-    en: { title: 'Language skills', desc: 'Indicate your language level.', levels: ['None','Basic','Intermediate','Good','Excellent'], extra: 'Other languages (optional)', next: 'Next' },
-    ru: { title: 'Языковые навыки', desc: 'Укажи свой уровень владения языками.', levels: ['Нет','Базовый','Средний','Хороший','Отличный'], extra: 'Другие языки (по желанию)', next: 'Далее' }
+    lv: { title: 'Valodu prasmes', desc: 'Norādi savu valodu pakapi (Eiropas standarts).', levels: ['Nav','A1','A2','B1','B2','C1','C2'], extra: 'Citas valodas (pēc izvēles)', next: 'Tālāk' },
+    en: { title: 'Language skills', desc: 'Indicate your language level (European standard).', levels: ['None','A1','A2','B1','B2','C1','C2'], extra: 'Other languages (optional)', next: 'Next' },
+    ru: { title: 'Языковые навыки', desc: 'Укажи уровень владения языком (европейский стандарт).', levels: ['Нет','A1','A2','B1','B2','C1','C2'], extra: 'Другие языки (по желанию)', next: 'Далее' }
   }[currentLang];
 
   const langNames = { lv: { lv: 'Latviešu', ru: 'Krievu', en: 'Angļu' }, en: { lv: 'Latvian', ru: 'Russian', en: 'English' }, ru: { lv: 'Латышский', ru: 'Русский', en: 'Английский' } }[currentLang];
@@ -1196,15 +1242,22 @@ function renderSchedule() {
 }
 
 // ══════════════════════════════════════════════════════
-// STEP 5 — AI QUESTIONS
+// STEPS 5 & 6 — AI QUESTIONS (two rounds)
 // ══════════════════════════════════════════════════════
-async function renderAI() {
+async function renderAI(round) {
   const body = document.getElementById('formBody');
   const loadText = {
-    lv: { loading: 'Analizējam tavas atbildes...', sub: 'Mākslīgais intelekts sagatavo precizējošus jautājumus' },
-    en: { loading: 'Analysing your answers...', sub: 'AI is preparing clarifying questions' },
-    ru: { loading: 'Анализируем твои ответы...', sub: 'ИИ готовит уточняющие вопросы' }
+    lv: { loading: 'Sagatavojam jautājumus...', sub: 'Tas var aiznemt dažas sekundes' },
+    en: { loading: 'Preparing questions...', sub: 'This may take a few seconds' },
+    ru: { loading: 'Подготавливаем вопросы...', sub: 'Это займет несколько секунд' }
   }[currentLang];
+
+  // If we already have questions for this round, skip API call
+  const existingQ = round === 1 ? aiQuestions1 : aiQuestions2;
+  if (existingQ && existingQ.length > 0) {
+    renderAIQuestions(round);
+    return;
+  }
 
   body.innerHTML = `
     <div class="ai-loading">
@@ -1215,83 +1268,116 @@ async function renderAI() {
   `;
 
   try {
-    const prompt = buildAIPrompt();
+    const prompt = buildAIPrompt(round);
     const resp = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'gemini',
-        model: GEMINI_MODEL,
-        prompt: prompt
-      })
+      body: JSON.stringify({ action: 'gemini', model: GEMINI_MODEL, prompt })
     });
     const data = await resp.json();
     const text = extractGeminiText(data);
-    aiQuestions = parseAIQuestions(text);
+    const questions = parseAIQuestions(text, round);
+    if (round === 1) aiQuestions1 = questions;
+    else aiQuestions2 = questions;
   } catch(e) {
-    aiQuestions = getFallbackQuestions();
+    const fallback = getFallbackQuestions(round);
+    if (round === 1) aiQuestions1 = fallback;
+    else aiQuestions2 = fallback;
   }
 
-  renderAIQuestions();
+  renderAIQuestions(round);
 }
 
-function buildAIPrompt() {
+function buildAIPrompt(round) {
   const langName = { lv: 'latviešu', en: 'English', ru: 'русском' }[currentLang];
   const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ');
 
-  return `Tu esi pieklājīgs HR asistents restorānam. Tev jāuzdod kandidātam 2-3 precizējoši jautājumi, pamatojoties uz viņa anketas datiem.
+  if (round === 1) {
+    return `Tu esi HR asistents restorānam. Uzdod kandidātam tieši 2 precizējošus jautājumus par darba pieredzi un motivāciju.
 
 SVARĪGI:
-- Jautājumi jāraksta ${langName} valodā
-- Nekad nejautā par vecumu, dzimumu, ģimenes stāvokli, bērniem, veselību, nacionālitāti, reliģiju vai politiskiem uzskatiem
-- Jautājumi ir draudzīgi, profesionāli, kodolīgi
-- Jautā tikai par darba pieredzi, motivāciju, prasmes
-- Atbildi TIKAI ar JSON formātu: {"questions": ["jautājums 1", "jautājums 2", "jautājums 3"]}
+- Jautājumi TIKAI ${langName} valodā
+- Nekad nejautā par vecumu, dzimumu, bērniem, veselību, nacionālitāti, reliģiju
+- Jautājumi draudzīgi, kodolīgi, profesionāli
+- Atbildi TIKAI JSON: {"questions": ["jautājums 1", "jautājums 2"]}
 
-KANDIDĀTA DATI:
+KANDIDĀTS:
 - Vārds: ${formData.firstName}
 - Pieredze: ${formData.experienceYears}
 - Pēdējā darba vieta: ${formData.lastWorkplace || 'nav norādīts'}
 - Pēdējais amats: ${formData.lastPosition || 'nav norādīts'}
 - Valodas: ${langs || 'nav norādīts'}
-- Vakara maiņas: ${formData.evenings ? 'jā' : 'nē'}
-- Brīvdienas: ${formData.weekends ? 'jā' : 'nē'}
-- Pilna diena: ${formData.fullDay ? 'jā' : 'nē'}
 
-Uzdod 2-3 konkrētus precizējošus jautājumus par pieredzi vai motivāciju. JSON only, nekāds cits teksts.`;
-}
+JSON only, nekāds cits teksts.`;
+  } else {
+    const prev = Object.values(formData.aiAnswers1).map((qa, i) => `J${i+1}: ${qa.question}
+A: ${qa.answer}`).join('
 
-function parseAIQuestions(text) {
-  try {
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    return parsed.questions || getFallbackQuestions();
-  } catch {
-    const lines = text.split('\n').filter(l => l.trim().endsWith('?'));
-    return lines.length ? lines.slice(0,3) : getFallbackQuestions();
+');
+    return `Tu esi HR asistents restorānam. Kandidāts jau atbildēja uz pirmajiem jautājumiem. Uzdod vēl tieši 2 precizējošus jautājumus, kas loģiski turpina sarunu.
+
+SVARĪGI:
+- Jautājumi TIKAI ${langName} valodā
+- Nekad nejautā par vecumu, dzimumu, bērniem, veselību, nacionālitāti, reliģiju
+- Balsties uz iepriekšējām atbildēm, uzdod jaunus, dziļākus jautājumus
+- Atbildi TIKAI JSON: {"questions": ["jautājums 1", "jautājums 2"]}
+
+KANDIDĀTS:
+- Vārds: ${formData.firstName}
+- Pieredze: ${formData.experienceYears}
+- Grafiks: vakari=${formData.evenings?'jā':'nē'}, brīvdienas=${formData.weekends?'jā':'nē'}
+
+IEPRIEKŠĒJĀS ATBILDES:
+${prev || 'Nav'}
+
+JSON only, nekāds cits teksts.`;
   }
 }
 
-function getFallbackQuestions() {
-  return {
-    lv: ['Ko tevi piesaista darbam restorānā tieši šobrīd?', 'Kādu situāciju ar prasīgu viesi esi atrisinājis? Kā tu to izdarīji?'],
-    en: ['What attracts you to restaurant work right now?', 'Can you describe a situation with a demanding guest and how you handled it?'],
-    ru: ['Что привлекает тебя в работе в ресторане именно сейчас?', 'Расскажи о ситуации с требовательным гостем и как ты её решил?']
-  }[currentLang];
+function parseAIQuestions(text, round) {
+  try {
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    if (parsed.questions && parsed.questions.length >= 2) return parsed.questions.slice(0,2);
+    return getFallbackQuestions(round);
+  } catch {
+    const lines = text.split('\n').filter(l => l.trim().endsWith('?'));
+    return lines.length >= 2 ? lines.slice(0,2) : getFallbackQuestions(round);
+  }
 }
 
-function renderAIQuestions() {
+function getFallbackQuestions(round) {
+  if (round === 1) {
+    return {
+      lv: ['Ko tevi piesaista darbam restorānā tieši šobrīd?', 'Kāda ir tava lielākā stiprā puse, strādājot ar cilvēkiem?'],
+      en: ['What attracts you to restaurant work right now?', 'What is your greatest strength when working with people?'],
+      ru: ['Что привлекает тебя в работе в ресторане именно сейчас?', 'В чём твоя главная сильная сторона в работе с людьми?']
+    }[currentLang];
+  } else {
+    return {
+      lv: ['Kā tu rīkotos, ja viesim nepatiktu ēdiens?', 'Kas tev šķiet vissvarīgākais kvalitatīvā servisa darbā?'],
+      en: ['How would you handle a guest who is unhappy with their food?', 'What do you consider most important in quality service work?'],
+      ru: ['Как ты поступишь, если гостю не понравится блюдо?', 'Что для тебя самое важное в качественной сервисной работе?']
+    }[currentLang];
+  }
+}
+
+function renderAIQuestions(round) {
   const t = {
-    lv: { title: 'Daži precizējoši jautājumi', desc: 'Mākslīgais intelekts sagatavoja šos jautājumus, balstoties uz tavām atbildēm.', tag: 'AI jautājums', next: 'Turpināt', ph: 'Tava atbilde...' },
-    en: { title: 'A few clarifying questions', desc: 'AI prepared these questions based on your answers.', tag: 'AI question', next: 'Continue', ph: 'Your answer...' },
-    ru: { title: 'Несколько уточняющих вопросов', desc: 'ИИ подготовил эти вопросы на основе твоих ответов.', tag: 'Вопрос от ИИ', next: 'Продолжить', ph: 'Твой ответ...' }
+    lv: { title: round === 1 ? 'Uzdosim dažus jautājumus' : 'Vēl daži jautājumi', desc: round === 1 ? 'Atbildi godīgi — nav pareizu vai nepareizu atbilžu.' : 'Turpinām iepazīties ar tevi tuvāk.', next: 'Turpināt', ph: 'Tava atbilde...' },
+    en: { title: round === 1 ? 'A few questions for you' : 'A few more questions', desc: round === 1 ? 'Answer honestly — there are no right or wrong answers.' : 'We continue getting to know you better.', next: 'Continue', ph: 'Your answer...' },
+    ru: { title: round === 1 ? 'Несколько вопросов' : 'Ещё несколько вопросов', desc: round === 1 ? 'Отвечай честно — правильных или неправильных ответов нет.' : 'Продолжаем знакомиться с тобой поближе.', next: 'Продолжить', ph: 'Твой ответ...' }
   }[currentLang];
 
-  const qHtml = aiQuestions.map((q, i) => `
+  const questions = round === 1 ? aiQuestions1 : aiQuestions2;
+  const answers = round === 1 ? formData.aiAnswers1 : formData.aiAnswers2;
+  const baseNum = round === 1 ? 1 : 3;
+
+  const qHtml = questions.map((q, i) => `
     <div class="ai-question">
-      <div class="ai-question-label">◆ ${t.tag} ${i+1}</div>
+      <div class="ai-question-label">${baseNum + i}.</div>
       <div class="ai-question-text">${q}</div>
-      <textarea id="ai_ans_${i}" placeholder="${t.ph}" rows="3">${formData.aiAnswers[i]||''}</textarea>
+      <textarea id="ai_ans_${round}_${i}" placeholder="${t.ph}" rows="3">${answers[i] ? answers[i].answer : ''}</textarea>
     </div>
   `).join('');
 
@@ -1303,8 +1389,10 @@ function renderAIQuestions() {
   `;
 
   bindNav(() => {
-    aiQuestions.forEach((q, i) => {
-      formData.aiAnswers[i] = { question: q, answer: document.getElementById(`ai_ans_${i}`).value.trim() };
+    questions.forEach((q, i) => {
+      const ans = document.getElementById(`ai_ans_${round}_${i}`).value.trim();
+      if (round === 1) formData.aiAnswers1[i] = { question: q, answer: ans };
+      else formData.aiAnswers2[i] = { question: q, answer: ans };
     });
     return true;
   });
@@ -1377,7 +1465,11 @@ async function submitForm() {
 
 async function generateReport() {
   const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ') || '—';
-  const aiSection = Object.values(formData.aiAnswers).map((qa, i) => `Jautājums ${i+1}: ${qa.question}\nAtbilde: ${qa.answer}`).join('\n\n');
+  const allAnswers = [
+    ...Object.values(formData.aiAnswers1),
+    ...Object.values(formData.aiAnswers2)
+  ];
+  const aiSection = allAnswers.map((qa, i) => `Jautājums ${i+1}: ${qa.question}\nAtbilde: ${qa.answer}`).join('\n\n');
 
   const prompt = `Tu esi profesionāls HR speciālists. Uzraksti darba devējam īsu, bet informatīvu novērtējumu par kandidātu. Raksti vienkāršā latviešu valodā, bez emoji, bez techniskiem apzīmējumiem. Teksts jāraksta tā, kā cilvēks rakstītu cilvēkam.
 
@@ -1396,25 +1488,28 @@ Vakari: ${formData.evenings?'jā':'nē'}, Brīvdienas: ${formData.weekends?'jā'
 AI JAUTĀJUMI UN ATBILDES:
 ${aiSection || 'Nav'}
 
-Uzraksti novērtējumu šādā struktūrā (tikai teksts, bez markdown, bez headeriem ar #):
+Uzraksti novertejumu TIEŠI sada struktura. Nekad nelieto "-" vai "*" kā sarakstu simbolus. Nekad nelieto "#". Uzraksti skaidri un prot rakstit tekstu bez liekiem simboliem:
 
-ĪSAIS NOVĒRTĒJUMS
-[2-3 teikumi: vai vērts aicināt uz interviju un kāpēc]
+ISAIS NOVERTEJUMS
+[2-3 teikumi: vai verts aicinat uz interviju un kapec]
 
-PIEMĒROTĪBAS PROCENTS
-[skaitlis no 0 līdz 100]% — [īss pamatojums]
+PIEMEROTIBAS PROCENTS
+[skaitlis no 0 lidz 100]% — [iss pamatojums]
 
 KAS PATIKA
-[2-4 konkrēti plusi par šo kandidātu]
+1. [pirmais plus]
+2. [otrais plus]
+3. [tresais plus, ja ir]
 
-KAM PIEVĒRST UZMANĪBU
-[1-3 lietas, ko noskaidrot intervijā, vai trūkumi]
+KAM PIEVERT UZMANIBU
+1. [pirmais momants]
+2. [otrais momants, ja ir]
 
-AI JAUTĀJUMU ATBILŽU ANALĪZE
-[īss secinājums par to, kā kandidāts atbildēja uz precizējošajiem jautājumiem]
+JAUTAJUMU ATBILZU ANALIZE
+[iss secinajums par to, ka kandidats atbildeja]
 
 GALA IETEIKUMS
-[skaidrs ieteikums: aicināt vai nē, un kāpēc]`;
+[skaidrs ieteikums: aicinat vai ne, un kapec]`;
 
   try {
     const resp = await fetch(WORKER_URL, {
@@ -1447,52 +1542,78 @@ function buildFallbackReport() {
 }
 
 async function sendToTelegram(reportText) {
-  const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Net').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ') || '-';
+  const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Net').map(([k,v]) => k.toUpperCase() + ': ' + v).join(', ') || '-';
 
-  const shortMsg = [
-    'JAUNS KANDIDATS',
-    '',
-    'Vards: ' + formData.firstName + ' ' + formData.lastName,
-    'Amats: Viesmilis, Restaurant N',
-    'Telefons: ' + formData.phone,
-    'E-pasts: ' + formData.email,
-    'Pieredze: ' + formData.experienceYears,
-    'Valodas: ' + langs,
-    '',
-    'Pilns novertejums seko zemak.'
-  ].join('\n');
+  // Extract percentage from report for color circle
+  const pctMatch = reportText.match(/(\d{1,3})%/);
+  const pct = pctMatch ? parseInt(pctMatch[1]) : null;
+  let circle = '';
+  if (pct !== null) {
+    if (pct >= 75) circle = '\u{1F7E2}'; // green
+    else if (pct >= 50) circle = '\u{1F7E1}'; // yellow
+    else circle = '\u{1F534}'; // red
+  }
 
-  const fullMsg = [
-    'PILNS NOVERTEJUMS',
+  // Short message — clean, with circle near percent
+  const shortLines = [
+    circle + ' *JAUNS KANDIDATS* ' + circle,
     '',
-    'Kandidats: ' + formData.firstName + ' ' + formData.lastName,
-    'Telefons: ' + formData.phone,
-    'E-pasts: ' + formData.email,
-    (formData.age ? 'Vecums: ' + formData.age : ''),
-    '',
-    reportText
-  ].filter(Boolean).join('\n');
+    '*Vards:* ' + formData.firstName + ' ' + formData.lastName,
+    '*Amats:* Viesmilis, Restaurant N',
+    '*Telefons:* ' + formData.phone,
+    '*E-pasts:* ' + formData.email,
+    '*Pieredze:* ' + formData.experienceYears,
+    '*Valodas:* ' + langs,
+  ];
+  if (pct !== null) shortLines.push('*Piemerotiba:* ' + circle + ' ' + pct + '%');
+  shortLines.push('', 'Pilns novertejums seko zemak.');
+  const shortMsg = shortLines.join('\n');
 
-  // Send short message with button
+  // Full report — clean formatting with bold headers via **
+  // Clean any stray markdown symbols from AI output
+  const cleanReport = reportText
+    .replace(/^[-–—]\s+/gm, '')      // remove leading dashes
+    .replace(/^\*\s+/gm, '')          // remove * bullets
+    .replace(/\*\*([^*]+)\*\*/g, '*$1*')  // convert **bold** to *bold* for TG
+    .replace(/#{1,3}\s*/g, '')        // remove # headers
+    .trim();
+
+  // Add bold to known section headers
+  const formattedReport = cleanReport
+    .replace(/^(ISAIS NOVERTEJUMS|PIEMEROТIBAS PROCENTS|PIEMEROTIBAS PROCENTS|KAS PATIKA|KAM PIEVERT UZMANIBU|JAUTAJUMU ATBILZU ANALIZE|GALA IETEIKUMS|ISLAIS NOVERTEJUMS)$/gm, '*$1*');
+
+  const fullLines = [
+    '*PILNS NOVERTEJUMS*',
+    '',
+    '*Kandidats:* ' + formData.firstName + ' ' + formData.lastName,
+    '*Telefons:* ' + formData.phone,
+    '*E-pasts:* ' + formData.email,
+  ];
+  if (formData.age) fullLines.push('*Vecums:* ' + formData.age);
+  fullLines.push('', formattedReport);
+  const fullMsg = fullLines.join('\n');
+
+  // Send short message (parse_mode Markdown for bold)
   await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: TG_CHAT_ID,
       text: shortMsg,
+      parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [[{ text: 'Pilns novertejums', callback_data: 'full_' + Date.now() }]]
       }
     })
   });
 
-  // Send full report in chunks
+  // Send full report in chunks with Markdown
   const chunks = chunkText(fullMsg, 4000);
   for (const chunk of chunks) {
     await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: chunk })
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: chunk, parse_mode: 'Markdown' })
     });
     await new Promise(r => setTimeout(r, 300));
   }

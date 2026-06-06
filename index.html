@@ -1572,29 +1572,22 @@ async function sendToTelegram(reportText) {
 
   const fullMsg = fullLines.join('\n');
 
-  // Send short card
-  await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: TG_CHAT_ID,
-      text: shortMsg,
-      parse_mode: 'Markdown'
-    })
-  });
-
-  // Send full report in chunks (4000 chars), with Markdown formatting
-  const chunks = chunkText(fullMsg, 4000);
-  for (const chunk of chunks) {
-    await fetch('https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage', {
+  // Helper to send via Worker
+  async function tgSend(text) {
+    await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TG_CHAT_ID,
-        text: chunk,
-        parse_mode: 'Markdown'
-      })
+      body: JSON.stringify({ action: 'telegram', chat_id: TG_CHAT_ID, text: text, parse_mode: 'Markdown' })
     });
+  }
+
+  // Send short card
+  await tgSend(shortMsg);
+
+  // Send full report in chunks (4000 chars)
+  const chunks = chunkText(fullMsg, 4000);
+  for (const chunk of chunks) {
+    await tgSend(chunk);
     await new Promise(r => setTimeout(r, 300));
   }
 }
@@ -1675,4 +1668,4 @@ function prevStep() {
 renderStep();
 </script>
 </body>
-</html>
+  </html>

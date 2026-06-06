@@ -1528,11 +1528,10 @@ async function sendToTelegram(reportText) {
     .map(([k,v]) => `${k.toUpperCase()}: ${v}`)
     .join(', ') || 'nav norādīts';
 
-  // Extract percentage from report to pick circle colour
+  // Extract percentage to pick circle colour
   const pctMatch = reportText.match(/(\d{1,3})%/);
   const pct = pctMatch ? parseInt(pctMatch[1]) : null;
   const circle = pct === null ? '🟡' : pct >= 70 ? '🟢' : pct >= 45 ? '🟡' : '🔴';
-  const pctLine = pct !== null ? `${circle} ${pct}%` : '';
 
   const schedArr = [];
   if (formData.evenings) schedArr.push('vakari');
@@ -1540,51 +1539,54 @@ async function sendToTelegram(reportText) {
   if (formData.fullDay) schedArr.push('pilna diena');
   const sched = schedArr.join(', ') || 'nav norādīts';
 
-  // Short summary card — plain text, Telegram safe
-  const shortLines = [
-    '📋 JAUNS KANDIDĀTS',
+  // Strip **bold** markers from AI text so plain text sends cleanly
+  const cleanReport = reportText.replace(/\*\*/g, '').trim();
+
+  // Short summary card — plain text, no markdown
+  const shortParts = [
+    '📋 JAUNS KANDIDATS',
     '',
-    `**${formData.firstName} ${formData.lastName}**`,
+    `${formData.firstName} ${formData.lastName}`,
     `📞 ${formData.phone}`,
     `✉️ ${formData.email}`,
-    formData.age ? `🎂 ${formData.age} g.` : '',
-    '',
-    `**Pieredze:** ${formData.experienceYears}`,
-    `**Valodas:** ${langs}`,
-    `**Grafiks:** ${sched}`,
-    pctLine ? `\n**Atbilstība:** ${pctLine}` : '',
-    '',
-    '⬇️ Pilns novērtējums zemāk'
-  ].filter(l => l !== null && l !== undefined && !(l === '' && shortLines && shortLines[shortLines.length-1] === ''));
+  ];
+  if (formData.age) shortParts.push(`Vecums: ${formData.age}`);
+  shortParts.push('');
+  shortParts.push(`Pieredze: ${formData.experienceYears}`);
+  shortParts.push(`Valodas: ${langs}`);
+  shortParts.push(`Grafiks: ${sched}`);
+  if (pct !== null) shortParts.push(`Atbilstiba: ${circle} ${pct}%`);
+  shortParts.push('');
+  shortParts.push('⬇️ Pilns novertejums zemak');
 
-  const shortMsg = shortLines.join('\n');
+  const shortMsg = shortParts.join('\n');
 
-  // Full report: already contains **bold** headers and numbered lists from AI
-  const fullLines = [
-    `📄 PILNS NOVĒRTĒJUMS`,
+  // Full report
+  const fullParts = [
+    '📄 PILNS NOVERTEJUMS',
     '',
-    `**${formData.firstName} ${formData.lastName}**`,
+    `${formData.firstName} ${formData.lastName}`,
     `📞 ${formData.phone}  ✉️ ${formData.email}`,
-    formData.age ? `Vecums: ${formData.age}` : '',
-    '',
-    reportText.trim()
-  ].filter(l => l !== null && l !== undefined);
+  ];
+  if (formData.age) fullParts.push(`Vecums: ${formData.age}`);
+  fullParts.push('');
+  fullParts.push(cleanReport);
 
-  const fullMsg = fullLines.join('\n');
+  const fullMsg = fullParts.join('\n');
 
-  // Helper to send via Worker
+  // Helper — plain text, no parse_mode
   async function tgSend(text) {
-    await fetch(WORKER_URL, {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'telegram', chat_id: TG_CHAT_ID, text: text, parse_mode: 'Markdown' })
+      body: JSON.stringify({ action: 'telegram', chat_id: TG_CHAT_ID, text: text })
     });
+    const json = await res.json().catch(() => ({}));
+    if (!json.ok) console.error('TG error:', JSON.stringify(json));
   }
 
-  // Send short card
   await tgSend(shortMsg);
 
-  // Send full report in chunks (4000 chars)
   const chunks = chunkText(fullMsg, 4000);
   for (const chunk of chunks) {
     await tgSend(chunk);
@@ -1668,4 +1670,4 @@ function prevStep() {
 renderStep();
 </script>
 </body>
-  </html>
+</html>

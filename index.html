@@ -1626,12 +1626,7 @@ async function generateReport() {
   const langs = Object.entries(formData.languages).filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет').map(([k,v]) => `${k.toUpperCase()}: ${v}`).join(', ') || '—';
   const aiSection = Object.values(formData.aiAnswers).map((qa, i) => `${i+1}. ${qa.question}\n   ${qa.answer}`).join('\n\n');
 
-  const prompt = `Tu esi profesionāls HR speciālists. Uzraksti darba devējam īsu, bet informatīvu novērtējumu par kandidātu. Raksti vienkāršā latviešu valodā.
-
-SVARĪGI PAR FORMATĒJUMU:
-- Sadaļu virsrakstus raksti tieši tā: **VIRSRAKSTS** (ar divām zvaigznītēm no abām pusēm)
-- Saraksta punktus numurē: 1. 2. 3. (neizmanto defisi - vai zvaigznīti *)
-- Nekādu citu markdown simbolu
+  const prompt = `Tu esi HR speciālists. Novērtē kandidātu un atbildi TIKAI ar JSON objektu bez papildu teksta, markdown vai paskaidrojumiem.
 
 KANDIDĀTA DATI:
 Vārds: ${formData.firstName} ${formData.lastName}
@@ -1648,28 +1643,13 @@ Vakari: ${formData.evenings?'jā':'nē'}, Brīvdienas: ${formData.weekends?'jā'
 JAUTĀJUMI UN ATBILDES:
 ${aiSection || 'Nav'}
 
-Uzraksti novērtējumu TIEŠI šādā struktūrā:
-
-**ĪSAIS NOVĒRTĒJUMS**
-[2-3 teikumi: vai vērts aicināt uz interviju un kāpēc]
-
-**PIEMĒROTĪBAS PROCENTS**
-[skaitlis no 0 līdz 100]% — [īss pamatojums]
-
-**KAS PATIKA**
-1. [pirmais plus]
-2. [otrais plus]
-3. [trešais plus, ja ir]
-
-**KAM PIEVĒRST UZMANĪBU**
-1. [pirmā lieta]
-2. [otrā lieta, ja ir]
-
-**ATBILŽU ANALĪZE**
-[īss secinājums par to, kā kandidāts atbildēja uz jautājumiem]
-
-**GALA IETEIKUMS**
-[skaidrs ieteikums: aicināt vai nē, un kāpēc]`;
+Atbildi TIKAI ar šādu JSON (bez markdown, bez \`\`\`, bez papildu teksta):
+{
+  "atbilstiba": <vesels skaitlis 0-100>,
+  "novertejums": "<TIEŠI 2 teikumi latviešu valodā: īss novērtējums vai vērts aicināt + secinājums par atbildēm uz jautājumiem>",
+  "patika_nepatika": "<TIEŠI 2 teikumi latviešu valodā: pirmais teikums kas patika, otrais kas nepatika vai ko trūkst>",
+  "uzmanibu": "<TIEŠI 2 teikumi latviešu valodā: konkrētas lietas kam pievērst uzmanību intervijā>"
+}`;
 
   try {
     const resp = await fetch(WORKER_URL, {
@@ -1678,7 +1658,9 @@ Uzraksti novērtējumu TIEŠI šādā struktūrā:
       body: JSON.stringify({ action: 'gemini', model: GEMINI_MODEL, prompt })
     });
     const data = await resp.json();
-    return extractGeminiText(data) || buildFallbackReport();
+    const raw = extractGeminiText(data) || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
   } catch {
     return buildFallbackReport();
   }
@@ -1698,18 +1680,21 @@ function extractGeminiText(data) {
 }
 
 function buildFallbackReport() {
-  return `Jauns kandidāts: ${formData.firstName} ${formData.lastName}\nTālrunis: ${formData.phone}\nE-pasts: ${formData.email}\nPieredze: ${formData.experienceYears}\nLūdzu izskatīt manuāli.`;
+  return {
+    atbilstiba: null,
+    novertejums: 'AI novertejums nav pieejams. Ludzu izskatit manuali.',
+    patika_nepatika: '\u2014',
+    uzmanibu: '\u2014'
+  };
 }
 
-async function sendToTelegram(reportText) {
+async function sendToTelegram(reportData) {
   const langs = Object.entries(formData.languages)
     .filter(([k,v]) => v && v !== 'Nav' && v !== 'None' && v !== 'Нет')
     .map(([k,v]) => `${k.toUpperCase()}: ${v}`)
     .join(', ') || 'nav norādīts';
 
-  // Extract percentage to pick circle colour
-  const pctMatch = reportText.match(/(\d{1,3})%/);
-  const pct = pctMatch ? parseInt(pctMatch[1]) : null;
+  const pct = typeof reportData.atbilstiba === 'number' ? reportData.atbilstiba : null;
   const circle = pct === null ? '🟡' : pct >= 70 ? '🟢' : pct >= 45 ? '🟡' : '🔴';
 
   const schedArr = [];
@@ -1718,42 +1703,27 @@ async function sendToTelegram(reportText) {
   if (formData.fullDay) schedArr.push('pilna diena');
   const sched = schedArr.join(', ') || 'nav norādīts';
 
-  // Strip **bold** markers from AI text so plain text sends cleanly
-  const cleanReport = reportText.replace(/\*\*/g, '').trim();
+  const nameAge = formData.age
+    ? `${formData.firstName} ${formData.lastName}, ${formData.age}`
+    : `${formData.firstName} ${formData.lastName}`;
 
-  // Short summary card — plain text, no markdown
-  const shortParts = [
-    '📋 JAUNS KANDIDATS',
+  const atbilstibaLine = pct !== null ? `${circle} ${pct}%` : '🟡 nav datu';
+
+  const msg = [
+    'Pieteikums 📋',
     '',
-    `${formData.firstName} ${formData.lastName}`,
-    `📞 ${formData.phone}`,
-    `✉️ ${formData.email}`,
-  ];
-  if (formData.age) shortParts.push(`Vecums: ${formData.age}`);
-  shortParts.push('');
-  shortParts.push(`Pieredze: ${formData.experienceYears}`);
-  shortParts.push(`Valodas: ${langs}`);
-  shortParts.push(`Grafiks: ${sched}`);
-  if (pct !== null) shortParts.push(`Atbilstiba: ${circle} ${pct}%`);
-  shortParts.push('');
-  shortParts.push('⬇️ Pilns novertejums zemak');
+    `1. Atbilstiba: ${atbilstibaLine}`,
+    `2. Vards, uzvards, vecums: ${nameAge}`,
+    `3. Talrunis: ${formData.phone}`,
+    `4. E-mail: ${formData.email}`,
+    `5. Pieredze: ${formData.experienceYears}`,
+    `6. Valodas: ${langs}`,
+    `7. Grafiks: ${sched}`,
+    `8. Isais novertejums un atbildu analize: ${reportData.novertejums || '—'}`,
+    `9. Kas patika/nepatika: ${reportData.patika_nepatika || '—'}`,
+    `10. Kam pievert uzmanibu: ${reportData.uzmanibu || '—'}`,
+  ].join('\n');
 
-  const shortMsg = shortParts.join('\n');
-
-  // Full report
-  const fullParts = [
-    '📄 PILNS NOVERTEJUMS',
-    '',
-    `${formData.firstName} ${formData.lastName}`,
-    `📞 ${formData.phone}  ✉️ ${formData.email}`,
-  ];
-  if (formData.age) fullParts.push(`Vecums: ${formData.age}`);
-  fullParts.push('');
-  fullParts.push(cleanReport);
-
-  const fullMsg = fullParts.join('\n');
-
-  // Helper — plain text, no parse_mode
   async function tgSend(text) {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
@@ -1764,9 +1734,7 @@ async function sendToTelegram(reportText) {
     if (!json.ok) console.error('TG error:', JSON.stringify(json));
   }
 
-  await tgSend(shortMsg);
-
-  const chunks = chunkText(fullMsg, 4000);
+  const chunks = chunkText(msg, 4000);
   for (const chunk of chunks) {
     await tgSend(chunk);
     await new Promise(r => setTimeout(r, 300));
@@ -1906,4 +1874,4 @@ renderStep();
 })();
 </script>
 </body>
-  </html>
+</html>
